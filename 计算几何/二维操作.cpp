@@ -127,3 +127,169 @@ Point perpencenter(Point a,Point b,Point c){//垂心
 	v.e.y=v.s.y+a.x-c.x;
 	return Line_intersection(u.s,u.e,v.s,v.e);
 }
+int intersect_LtoC(Circle c,Point l1,Point l2){//判直线和圆相交,包括相切
+	return disptoline(c.center,l1,l2)<c.r+eps;
+}
+int intersect_StoC(Circle c,Point l1,Point l2){
+//判线段和圆相交,包括端点和相切
+	double t1=c.center.distTo(l1)-c.r,t2=c.center.distTo(l2)-c.r;
+	Point t=c.center;
+	if (t1<eps||t2<eps)
+		return t1>-eps||t2>-eps;
+	t.x+=l1.y-l2.y;
+	t.y+=l2.x-l1.x;
+	return cross(l1,c.center,t)*cross(l2,c.center,t)<eps
+		&& disptoline(c.center,l1,l2)-c.r<eps;
+}
+int intersect_CtoC(Circle c1,Circle c2){
+//判圆和圆相交,包括相切
+	return c1.center.distTo(c2.center)<c1.r+c2.r+eps&&
+		c1.center.distTo(c2.center)>fabs(c1.r-c2.r)-eps;
+}
+Point dot_to_circle(Circle c,Point p){
+//计算圆上到点p最近点,如p与圆心重合,返回p本身
+	Point u,v;
+	if (p.distTo(c.center)<eps) return p;
+	u.x=c.center.x+c.r*fabs(c.center.x-p.x)/c.center.distTo(p);
+	u.y=c.center.y+c.r*fabs(c.center.y-p.y)/c.center.distTo(p)*((c.center.x-p.x)*(c.center.y-p.y)<0?-1:1);
+	v.x=c.center.x-c.r*fabs(c.center.x-p.x)/c.center.distTo(p);
+	v.y=c.center.y+c.r*fabs(c.center.y-p.y)/c.center.distTo(p)*((c.center.x-p.x)*(c.center.y-p.y)<0?-1:1);
+	return p.distTo(u)<p.distTo(v)?u:v;
+}
+void intersect_LtoC(Circle c,Point l1,Point l2,Point& p1,Point& p2){
+//计算直线与圆的交点,保证直线与圆有交点
+	Point p=c.center;
+	double t;
+	p.x+=l1.y-l2.y;p.y+=l2.x-l1.x;
+	p=Line_intersection(p,c.center,l1,l2);
+	t=sqrt(sqr(c.r)-sqr(p.distTo(c.center)))/l1.distTo(l2);
+	p1.x=p.x+(l2.x-l1.x)*t;
+	p1.y=p.y+(l2.y-l1.y)*t;
+	p2.x=p.x-(l2.x-l1.x)*t;
+	p2.y=p.y-(l2.y-l1.y)*t;
+}
+void intersect_CtoC(Circle c1,Circle c2,Point& p1,Point& p2){
+//计算圆与圆的交点,保证圆与圆有交点,圆心不重合
+	Point u,v;
+	double t;
+	t=(1+(sqr(c1.r)-sqr(c2.r))/sqr(c1.center.distTo(c2.center)))/2;
+	u.x=c1.center.x+(c2.center.x-c1.center.x)*t;
+	u.y=c1.center.y+(c2.center.y-c1.center.y)*t;
+	v.x=u.x+c1.center.y-c2.center.y;
+	v.y=u.y-c1.center.x+c2.center.x;
+	intersect_LtoC(c1,u,v,p1,p2);
+}
+void TanPoint(Point p1,Circle c,Point& r1,Point& r2){
+//求圆外一点对圆(o,r)的两个切点result1和result2
+	double line=sqrt(sqr(p1.x-c.center.x)+sqr(p1.y-c.center.y));
+	double angle=acos(c.r/line);
+	Point unitvector,lin;
+	lin.x=p1.x-c.center.x;
+	lin.y=p1.y-c.center.y;
+	unitvector.x=lin.x/sqrt(sqr(lin.x)+sqr(lin.y))*c.r;
+	unitvector.y=lin.y/sqrt(sqr(lin.x)+sqr(lin.y))*c.r;
+	r1=unitvector.rotate_left(-angle);
+	r2=unitvector.rotate_left(angle);
+	r1.x+=c.center.x;
+	r1.y+=c.center.y;
+	r2.x+=c.center.x;
+	r2.y+=c.center.y;
+}
+Point Getcenter(int i,int j,int k,Point p[]){//求p[i],p[j],p[k]三点构成的圆圆心，事先判是否共线
+    double tempx1,tempx2,tempy1,tempy2,x,y;
+    double k1,k2;
+    if(sign(p[i].y-p[j].y)==0)
+    {
+        x=(p[i].x+p[j].x)/2.0;
+        tempx1=(p[i].x+p[k].x)/2.0;
+        tempy1=(p[i].y+p[k].y)/2.0;
+        k1=(p[k].x-p[i].x)/(p[i].y-p[k].y);
+        y=k1*(x-tempx1)+tempy1;
+    }
+    else if(sign(p[i].y-p[k].y)==0)
+    {
+        x=(p[i].x+p[k].x)/2.0;
+        tempx1=(p[i].x+p[j].x)/2.0;
+        tempy1=(p[i].y+p[j].y)/2.0;
+        k1=(p[j].x-p[i].x)/(p[i].y-p[j].y);
+        y=k1*(x-tempx1)+tempy1;
+    }
+    else if(sign(p[j].y-p[k].y)==0)
+    {
+        x=(p[j].x+p[k].x)/2.0;
+        tempx1=(p[i].x+p[k].x)/2.0;
+        tempy1=(p[i].y+p[k].y)/2.0;
+        k1=(p[k].x-p[i].x)/(p[i].y-p[k].y);
+        y=k1*(x-tempx1)+tempy1;
+    }
+    else
+    {
+        tempx1=(p[i].x+p[k].x)/2.0;
+        tempy1=(p[i].y+p[k].y)/2.0;
+        k1=(p[k].x-p[i].x)/(p[i].y-p[k].y);
+        tempx2=(p[i].x+p[j].x)/2.0;
+        tempy2=(p[i].y+p[j].y)/2.0;
+        k2=(p[j].x-p[i].x)/(p[i].y-p[j].y);
+        x=((tempy2-tempy1)+k1*tempx1-k2*tempx2)/(k1-k2);
+        y=k1*(x-tempx1)+tempy1;
+	}
+	return Point(x,y);
+}
+
+//判点在任意多边形内,顶点按顺时针或逆时针给出
+//on_edge表示点在多边形边上时的返回值,offset为多边形坐标上限
+int inside_poly(Point q,int n,Poly p,int offset,int on_edge=2){
+	Point q2;
+	int count,i=0;
+	while (i<n)
+		for (count=i=0,q2.x=rand()+offset,q2.y=rand()+offset;i<n;i++){
+			if (sign(cross(q,p[i],p[(i+1)%n]))==0&&(p[i].x-q.x)*(p[(i+1)%n].x-q.x)<eps
+				&&(p[i].y-q.y)*(p[(i+1)%n].y-q.y)<eps)
+				return on_edge;
+			else if (sign(cross(q,q2,p[i]))==0)
+				break;
+			else if (sign(cross(q,p[i],q2)*cross(q,p[(i+1)%n],q2))==-1&&sign(cross(p[i],q,p[(i+1)%n])*cross(p[i],q2,p[(i+1)%n]))==-1)
+				count++;
+			return count&1;
+		}
+}
+Point barycenter(Point a,Point b,Point c){//三角形重心
+	Line u,v;
+	u.s.x=(a.x+b.x)/2;
+	u.s.y=(a.y+b.y)/2;
+	u.e=c;
+	v.s.x=(a.x+c.x)/2;
+	v.s.y=(a.y+c.y)/2;
+	v.e=b;
+	return Line_intersection(u.s,u.e,v.s,v.e);
+}
+Point Polybarycenter(int n,Poly p){//多边形重心
+	Point ret(0,0),t;
+	double t1=0,t2;
+	for (int i=1;i<n-1;i++)
+		if (sign(t2=cross(p[0],p[i],p[i+1]))>=1){
+			t=barycenter(p[0],p[i],p[i+1]);
+			ret.x+=t.x*t2;
+			ret.y+=t.y*t2;
+			t1+=t2;
+		}
+		if (sign(t1)>=1)
+			ret.x/=t1,ret.y/=t1;
+		return ret;
+}
+void polygon_cut(int& n,Poly p,Point l1,Point l2,Point side){//将多边形沿l1,l2确定的直线切割在side侧切割,保证l1,l2,side不共线
+	Poly pp;pp.clear();
+	int cnt=0,m=0;
+	for (int i=0;i<n;i++){
+		if (same_side(p[i],side,l1,l2))
+			pp[cnt++]=p[i];
+		if (!same_side(p[i],p[(i+1)%n],l1,l2)&&sign(cross(p[i],l1,l2))!=0&&
+			sign(cross(p[(i+1)%n],l1,l2))==0)
+			pp[cnt++]=Line_intersection(p[i],p[(i+1)%n],l1,l2);
+	}
+	for (int i=n=0;i<m;i++)
+		if (!i||sign((pp[i]-pp[i-1]).x)||sign((pp[i]-pp[i-1]).y))
+			p[n++]=pp[i];
+	if (sign((p[n-1]-p[0]).x)==0&&sign((p[n-1]-p[0]).y)==0)
+	if (n<3) n=0;
+}
