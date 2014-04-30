@@ -1,16 +1,6 @@
-ll fastpow(ll a,ll b,int mod){//¿ìËÙÃÝ
-	ll ans=1,temp=a;
-	while (b>0){
-		if (b&1) ans=(ans*temp)%mod;
-		temp*=temp;temp%=mod;
-		b>>=1;
-	}
-	return ans;
-}
-
 int millerrabin(ll a,ll n)//a^(n-1)%n==1
 {
-	ll x,m,k,b;
+	ll x,m,k,b;int i;
 	m=n-1;
 	k=0;
 	while (!(m&1)) {k++;m=(m>>1);}
@@ -24,7 +14,7 @@ int millerrabin(ll a,ll n)//a^(n-1)%n==1
 	}
 	return 0;
 }
-int calc(ll n,int prime[]){//Miller_Rabin Test
+int calc(ll n){//prime is an array which contains primes
 	ll a;
 	for (int i=0;i<5;i++)
 	{
