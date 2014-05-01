@@ -293,3 +293,48 @@ void polygon_cut(int& n,Poly p,Point l1,Point l2,Point side){//将多边形沿l1,l2确
 	if (sign((p[n-1]-p[0]).x)==0&&sign((p[n-1]-p[0]).y)==0)
 	if (n<3) n=0;
 }
+void CirclesTangent(int i,int j,const Circle& a,const Circle& b)
+{//求出ab两圆相切的切线在a上的两个切点（两圆外离）
+     double x0 = b.center.x-a.center.x;
+     double y0 = b.center.y-a.center.y;
+     double cs,sn;
+     Point res0, res1;
+     double rdis = a.r - b.r;//a.r-b.r求外切线，a.r+b.r求内切线
+     if (sign(y0)==0)
+     {
+         cs = rdis / x0;
+         sn = sqrt(1 - cs * cs);
+         res0 = Point(a.r * cs,a.r * sn);
+         res1 = Point(a.r * cs,a.r *-sn);
+     }
+     else
+     {
+         double A = sqr(x0 / y0) + 1;
+         double B = - 2 * x0 * rdis / y0 / y0;
+         double C = sqr(rdis / y0) - 1;
+         double delta = sqrt(B*B - 4*A*C);
+         cs = (-B + delta) / 2 / A;
+         sn = (rdis - x0 * cs) / y0;
+         res0 = Point(a.r * cs,a.r * sn);
+         cs = (-B - delta) / 2 / A;
+         sn = (rdis - x0 * cs) / y0;
+         res1 = Point(a.r * cs,a.r * sn);
+     }
+  
+     // result :
+	 Point(res0.x + a.center.x,res0.y + a.center.y);
+     Point(res1.x + a.center.x,res1.y + a.center.y);
+}
+
+  
+double arc(Point& a,Point& b,const Circle &c)
+{//圆c上两点从(a,b)逆时针到(x,y)的弧长
+	double A = a.distTo(c.center);
+	double B = b.distTo(c.center);
+	double C =a.distTo(b);
+     double ang = acos((A*A + B*B - C*C) / (2*A*B));
+	 if (cross(c.center,a,b)>0)
+        return ang * c.r;
+     else
+        return (pi + pi - ang)*c.r;
+}
