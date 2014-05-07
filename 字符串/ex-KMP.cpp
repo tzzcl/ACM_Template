@@ -14,7 +14,7 @@ void getNext(const char t[],int nxt[],int n){
 		}else nxt[i] = l;
 	}
 }
-//extend[i]求出s[i]和t的最长匹配长度
+//extend[i]求出s[i]和t的最长匹配长度。。
 void getExtend(const char s[],const char t[],int nxt[],int extend[],int n,int m){
 	getNext(t,nxt,m);
 	int a = 0;

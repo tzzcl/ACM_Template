@@ -9,7 +9,7 @@ int getFail(char p[],int f[]){
 	return m;
 }
 
-//s是匹配串，p是模版串
+//s是匹配串，p是模版串。
 bool find(char s[],char p[],int f[]){
 	int n = strlen(s);
 	int m = getFail(p,f);
