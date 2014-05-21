@@ -117,3 +117,17 @@ double angle_cos_Plane(Point3 u1,Point3 u2,Point3 u3,Point3 v1,Point3 v2,Point3 
 //两平面夹角cos值
 	return pvec(u1,u2,u3)*pvec(v1,v2,v3)/pvec(u1,u2,u3).len()/pvec(v1,v2,v3).len();
 }
+//a点绕 Ob 向量，逆时针旋转弧度 angle ,sin(angle),cos(angle)先求出来，减少精度问题。
+Point3 rotate(Point3 a,Point3 b,double angle){
+	double l=b.len();b.x/=l;b.y/=l;b.z/=l;
+	Point3 e3=b;double len=a*e3;
+	Point3 e1=a-e3*len;
+	if (e1.len()>eps){
+		l=e1.len();e1.x/=l;e1.y/=l;e1.z/=l;
+	}
+	else return a;
+	Point3 e2=e1^e3;
+	double x1,y1,x,y;y1=a*e1;x1=a*e2;
+	x=x1*cos(angle)-y1*sin(angle);y=x1*sin(angle)+y1*cos(angle);
+	return e3*len+e1*y+e2*x;
+}

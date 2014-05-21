@@ -22,6 +22,12 @@ struct Point3{//µã
 	Point3 operator +(const Point3& b)const{
 		return Point3(x+b.x,y+b.y,z+b.z);
 	};
+	Point3 operator *(const double& d)const{
+		return Point3(x*d,y*d,z*d);
+	}
+	Point3 operator /(const double& d)const{
+		return Point3(x/d,y/d,z/d);
+	}
 	double operator *(const Point3& b)const{
 		return x*b.x+y*b.y+z*b.z;
 	}
