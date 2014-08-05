@@ -1,56 +1,30 @@
-struct complex
+锘縯ypedef complex<double> Complex;
+void FFT(Complex* P, int n, int oper)//oper 1 DFT,oper -1 iDFT
 {
-	double r,i;
-	complex(double real=0.0,double image=0.0){
-		r=real;	i=image;
+    for (int i = 1, j = 0; i < n - 1; i++) {
+        for (int s = n; j ^= s >>= 1, ~j & s;);
+        if (i < j) {
+            swap(P[i], P[j]);
+        }
+    }
+    Complex unit_p0;
+    for (int d = 0; (1 << d) < n; d++) {
+        int m = 1 << d, m2 = m * 2;
+        double p0 = pi / m * oper;
+        unit_p0 = Complex(cos(p0), sin(p0));
+        for (int i = 0; i < n; i += m2) {
+            Complex unit = 1;
+            for (int j = 0; j < m; j++) {
+                Complex &P1 = P[i + j + m], &P2 = P[i + j];
+                Complex t = unit * P1;
+                P1 = P2 - t;
+                P2 = P2 + t;
+                unit = unit * unit_p0;
+            }
+        }
+    }
+	if (oper==-1){
+		for (int i=0;i<n;i++)
+			P[i]/=n;
 	}
-	// 以下为三种虚数运算的定义
-	complex operator + (const complex o){
-		return complex(r+o.r,i+o.i);
-	}
-	complex operator - (const complex o){
-		return complex(r-o.r,i-o.i);
-	}
-	complex operator * (const complex o){
-		return complex(r*o.r-i*o.i,r*o.i+i*o.r);
-	}
-};
-void brc(complex y[],int l) 
-{
-	int i,j,k;
-	for(i=1,j=l/2;i<l-1;i++)
-	{
-		if(i<j)	swap(y[i],y[j]);
-		k=l/2;
-		while(j>=k) 
-		{
-			j-=k;
-			k/=2;
-		}
-		if(j<k)	j+=k;
-	}
-}
-void fft(complex y[],int l,double on) // FFT O(nlogn)
-				     		// 其中on==1时为DFT，on==-1为IDFT
-{
-	register int h,i,j,k;
-	complex u,t; 
-	brc(y,l); 
-	for(h=2;h<=l;h<<=1) 
-	{
-		complex wn(cos(on*2*pi/h),sin(on*2*pi/h));
-		for(j=0;j<l;j+=h)
-		{
-			complex w(1,0);
-			for(k=j;k<j+h/2;k++)
-			{
-				u=y[k];
-				t=w*y[k+h/2];
-				y[k]=u+t;
-				y[k+h/2]=u-t;
-				w=w*wn;
-			}
-		}
-	}
-	if(on==-1)	for(i=0;i<l;i++)	y[i].r/=l; // IDFT
 }
